@@ -1,0 +1,28 @@
+name: Build Golpo Chat
+run-name: Golpo Chat build ${{ github.run_number }}
+on:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: unzip -o -q Golpo.zip
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - run: bash ci/build.sh
+        env:
+          UPLOAD_PASSWORD: ${{ secrets.UPLOAD_PASSWORD }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Golpo Chat build ${{ github.run_number }}
+          files: dist/*
